@@ -9,8 +9,15 @@ import (
 )
 
 func ListUser(c *gin.Context) {
+	name := c.Query("name")
+	selector := v1.UserSelector{Name: name}
+	page := common.BuildPageParams(c)
+	users, count, err := service.ListUser(selector, page)
+	rb, _ := json.Marshal(users)
 	c.JSON(200, gin.H{
-		"message": "Hello, Gin!",
+		"items": string(rb),
+		"count": count,
+		"err":   err.Error(),
 	})
 }
 

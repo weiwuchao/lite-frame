@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	v1 "lite-frame/apis/v1"
 	"lite-frame/config"
 	"time"
 )
@@ -27,4 +28,21 @@ func InitMysql() error {
 	DB = mysqlDb
 
 	return nil
+}
+
+func ApplyPageSql(db *gorm.DB, page v1.Page) (int64, error) {
+
+	var count int64
+	if page.PageSize > 0 {
+		db = db.Limit(page.PageNumber).Offset((page.PageNumber - 1) * page.PageSize)
+	} else {
+		db = db.Offset(0)
+	}
+	if err := db.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	if page.OrderBy != "" {
+		db = db.Order(page.PackOrderSql())
+	}
+	return count, nil
 }

@@ -13,12 +13,15 @@ func ListUser(c *gin.Context) {
 	selector := v1.UserSelector{Name: name}
 	page := common.BuildPageParams(c)
 	users, count, err := service.ListUser(selector, page)
-	rb, _ := json.Marshal(users)
-	c.JSON(200, gin.H{
-		"items": string(rb),
-		"count": count,
-		"err":   err.Error(),
-	})
+	if err != nil {
+		c.JSON(500, err)
+		return
+	}
+	items := v1.List{
+		Count: count,
+		Items: users,
+	}
+	c.JSON(200, items)
 }
 
 func GetUserById(c *gin.Context) {
@@ -35,15 +38,13 @@ func Create(c *gin.Context) {
 	body := common.ReadRequestBody(c.Request)
 	user := v1.User{}
 	if err := json.Unmarshal(body, &user); err != nil {
-		c.JSON(500, gin.H{"message": "Create User failed!"})
+		c.JSON(500, err)
 		return
 	}
 	err := service.CreateUser(user)
 	if err != nil {
-		c.JSON(500, gin.H{"message": "Create User failed!"})
+		c.JSON(500, err)
 		return
 	}
-	c.JSON(200, gin.H{
-		"message": "Create User Success!",
-	})
+	c.JSON(200, user)
 }

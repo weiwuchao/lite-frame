@@ -11,6 +11,7 @@ import (
 
 type SeverConfig struct {
 	Port    int
+	TLSPort int
 	LogPath string
 }
 
@@ -26,6 +27,7 @@ func NewServer() *HttpServer {
 
 func (h *HttpServer) InitCommand() {
 	flag.IntVar(&h.Config.Port, "port", 8080, "insecure http port")
+	flag.IntVar(&h.Config.TLSPort, "tls-port", 8443, "secure http port")
 	flag.StringVar(&h.Config.LogPath, "log-path", "gin.log", "log path")
 }
 
@@ -41,12 +43,23 @@ func (h *HttpServer) InitLog() {
 	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 }
 
-func (h *HttpServer) Run() {
+func (h *HttpServer) RunHttp() {
 	// 创建Gin的默认引擎
 	r := gin.Default()
 	g := r.Group("/api/lite-frame/v1")
 	router.InitRouter(g)
 	err := r.Run(fmt.Sprintf(":%d", h.Config.Port))
+	if err != nil {
+		return
+	}
+}
+
+func (h *HttpServer) RunHttps() {
+	// 创建Gin的默认引擎
+	r := gin.Default()
+	g := r.Group("/api/lite-frame/v1")
+	router.InitRouter(g)
+	err := r.RunTLS(fmt.Sprintf(":%d", h.Config.TLSPort), "certs/server.pem", "certs/server.key")
 	if err != nil {
 		return
 	}

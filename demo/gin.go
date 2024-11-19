@@ -28,7 +28,8 @@ func testGin() {
 	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 	// 创建Gin的默认引擎
 	r := gin.Default()
-	r.Use()
+	r.Use(m1)
+	r.With()
 
 	// 定义一个GET请求的处理器函数
 	r.GET("/hello", func(c *gin.Context) {

@@ -19,6 +19,8 @@ func main() {
 	//初始化数据库
 	factory.InitDB()
 
-	//启动rest服务
-	s.Run()
+	//启动http服务
+	go s.RunHttp()
+	//启动https服务
+	s.RunHttps()
 }
